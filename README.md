@@ -4,7 +4,9 @@ Project - README
 Members
 -------
 
-- Domer McDomerson (dmcdomer@nd.edu)
+- Luke Wurl (lwurl@nd.edu)
+- Sam MacGinty (smacgint@nd.edu)
+- James Philhower (jphilhow@nd.edu)
 
 Demonstration
 -------------
