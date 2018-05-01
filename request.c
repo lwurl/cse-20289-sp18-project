@@ -93,8 +93,6 @@ void free_request(Request *r) {
     	return;
     }
 
-
-
     /* Close socket or fd */
 
     if(r->file)
@@ -106,10 +104,25 @@ void free_request(Request *r) {
       close(r->fd);
     }
     /* Free allocated strings */
+    
+    free(r->method);
+    free(r->path);
+    free(r->query); // if statement ?
+    free(r->uri);
 
     /* Free headers */
+    struct header *prev;
+    header = r->headers;
+    while (header != NULL){
+        free(header->name);
+        free(header->value);
+        prev = header;
+        header = header->next;
+        free(prev);
+    }
 
     /* Free request */
+    free(r);
 }
 
 /**
@@ -123,8 +136,9 @@ void free_request(Request *r) {
  **/
 int parse_request(Request *r) {
     /* Parse HTTP Request Method */
-
     /* Parse HTTP Requet Headers*/
+    if (parse_request_method(r) != 0 || parse_request_headers(r) != 0)
+        return -1;
     return 0;
 }
 
@@ -152,12 +166,34 @@ int parse_request_method(Request *r) {
     char *query;
 
     /* Read line from socket */
-
+    
+    if(!(fgets(buffer, BUFSIZ, r->file)) || strlen(buffer)<=2)
+    {
+        goto fail;
+    }
+    
     /* Parse method and uri */
-
+    
+    method = strtok(skip_whitespace(buffer), WHITESPACE);
+    uri = strtok(NULL, WHITESPACE);
+    
     /* Parse query from uri */
 
+    if ((query = strchr(uri, '?')))
+    {
+        *query = 0;
+        ++query;
+    }
+    else
+    {
+        query = "";
+    }
+
     /* Record method, uri, and query in request struct */
+
+    r->method = strdup(method);
+    r->uri = strdup(uri);
+    r->query = strdup(query);
 
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
@@ -204,8 +240,26 @@ int parse_request_headers(Request *r) {
 
     /* Parse headers from socket */
 
+    while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2){
+        curr = calloc(sizeof(struct header), 1);
+        if (curr == NULL){
+            goto fail;
+        }
+        name = strtok(skip_whitespace(buffer), ":");
+        value = strtok(NULL, "\n");
+        chomp(value);
+        if (value == NULL){
+            goto fail;
+        }
+        curr->name = strdup(name);
+        curr->value = strdup(value);
+        curr->next = r->headers;
+        r->headers = curr;
+    }
+
 #ifndef NDEBUG
-    for (struct header *header = r->headers; header != NULL; header = header->next) {
+    for (struct header *header = r->headers; header != NULL; header = header->next) 
+    {
     	debug("HTTP HEADER %s = %s", header->name, header->value);
     }
 #endif
