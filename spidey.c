@@ -44,6 +44,40 @@ void usage(const char *progname, int status) {
  * if specified.
  */
 bool parse_options(int argc, char *argv[], ServerMode *mode) {
+  int argind = 1;
+
+  PROGRAM_NAME = argv[0];
+  while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-') {   /* 8 */
+      char *arg = argv[argind++];
+      switch (arg[1]) {
+          case 'h':
+              usage(PROGRAM_NAME,0);
+              break;
+            case 'p':
+              Port = argv[argind++];
+              break;
+            case 'r':
+              RootPath = argv[argind++];
+              break;
+            case 'M':
+              DefaultMimeType = argv[argind++];
+              break;
+            case 'm':
+              MimeTypesPath = argv[argind++];
+              break;
+            case 'c':
+              if(streq(argv[argind++], "forking"))
+              {
+                  mode = fork;
+              } else {
+                  mode = single;
+              }
+              break;
+            default:
+              usage(PROGRAM_NAME,1);
+              break;
+      }
+  }
     return true;
 }
 
@@ -54,9 +88,24 @@ int main(int argc, char *argv[]) {
     ServerMode mode;
 
     /* Parse command line options */
+    bool parsed = parse_options(argc, argv, mode);
+    if(!parsed){
+      fprintf(stderr, "Could not parse... %s\n", strerror(errno));
+      return EXIT_FAILURE;
+    }
 
     /* Listen to server socket */
 
+    int FD = socket_listen(Port);
+    if(sfd == -1){
+      fprintf(stderr, "Unable to open file... %s\n", strerror(errno));
+      return EXIT_FAILURE;
+    }
+
+    if((RootPath = realpath(RootPath, NULL)) == NULL){
+      fprintf(stderr, "Unable to find real path... %s\n", strerror(errno));
+      return EXIT_FAILURE;
+    }
     /* Determine real RootPath */
 
     log("Listening on port %s", Port);
@@ -66,6 +115,14 @@ int main(int argc, char *argv[]) {
     debug("ConcurrencyMode = %s", mode == SINGLE ? "Single" : "Forking");
 
     /* Start either forking or single HTTP server */
+    if(mode == single){
+      single_server(FD);
+    } else if (mode == fork) {
+      forking_server(FD)
+    } else {
+      fprintf(stderr, "Unable to start server... %s\n", strerror(errno));
+      return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
 
