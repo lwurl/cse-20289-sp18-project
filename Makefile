@@ -14,3 +14,9 @@ clean:
 
 .SUFFIXES:
 .PHONY:		all test benchmark clean
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+spidey: forking.o handler.o request.o single.o socket.o spidey.o utils.o
+	$(LD) $(LDFLAGS) -o $@ $^
