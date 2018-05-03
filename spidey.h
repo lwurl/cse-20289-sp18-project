@@ -73,7 +73,7 @@ typedef enum {
     HTTP_STATUS_BAD_REQUEST,		/* 400 Bad Request */
     HTTP_STATUS_NOT_FOUND,		/* 404 Not Found */
     HTTP_STATUS_INTERNAL_SERVER_ERROR,	/* 500 Internal Server Error */
-    HTTP_I_AM_A_TEAPOT,
+    HTTP_STATUS_I_AM_A_TEAPOT,
 } HTTPStatus;
 
 HTTPStatus      handle_request(Request *request);

@@ -14,16 +14,19 @@
  * @return  Exit status of server (EXIT_SUCCESS).
  **/
 int single_server(int sfd) {
-    struct request *request;
+    Request *request;
     
     /* Accept and handle HTTP request */
     while (true) {
-    	/* Accept request */
+    	puts("Before accept");
+        /* Accept request */
         request = accept_request(sfd);
 
+        puts("before handle");
 	/* Handle request */
         handle_request(request);
 
+        puts("before free");
 	/* Free request */
         free_request(request);
     }

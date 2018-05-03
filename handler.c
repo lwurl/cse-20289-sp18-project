@@ -43,17 +43,16 @@ HTTPStatus  handle_request(Request *r) {
     /* Dispatch to appropriate request handler type based on file type */
 
     struct stat s;
-    request_type type;
     if(lstat(r->path, &s) != 0){
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
     }
     if((s.st_mode & S_IFMT) == S_IFDIR){
         result = handle_browse_request(r);
     }
-    else if(access(path, X_OK) == 0){
+    else if(access(r->path, X_OK) == 0){
         result = handle_cgi_request(r);
     }
-    else if(access(path, R_OK) == 0){
+    else if(access(r->path, R_OK) == 0){
         result = handle_file_request(r);
     }
     else{
@@ -129,7 +128,7 @@ HTTPStatus  handle_file_request(Request *r) {
     /* Write HTTP Headers with OK status and determined Content-Type */
     fprintf(r->file, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimetype);
     /* Read from file and write to socket in chunks */
-    while((nread = freat(buffer, 1, BUFSIZ, fs)) > 0){
+    while((nread = fread(buffer, 1, BUFSIZ, fs)) > 0){
         fwrite(buffer, 1, nread, r->file);
     }
     /* Close file, flush socket, deallocate mimetype, return OK */
@@ -173,14 +172,14 @@ HTTPStatus handle_cgi_request(Request *r) {
 
     /* Export CGI environment variables from request headers */
     setenv("DOCUMENT_ROOT", RootPath, 1);
-    header = r->headers;
+    struct header *header = r->headers;
 
     while(header){
 
 
         if(streq(header->name, "Host")){
             char *port = strchr(header->value, ':')+1;
-            chat *host = strtok(header->value, ":");
+            char *host = strtok(header->value, ":");
             setenv("HTTP_HOST", host, 1);
             setenv("SERVER_PORT", port, 1);
         }
@@ -243,7 +242,7 @@ HTTPStatus  handle_error(Request *r, HTTPStatus status) {
     fprintf(r->file, "HTTP/1.0 %s\r\nContent-Type: text/html\r\n\r\n", status_string);
     /* Write HTML Description of Error*/
     fprintf(r->file, "<html>\n<h1>%s</h1>\n", status_string);
-    fprintf(r->file, <h2> Did you ever hear the tragedy of Darth Plagueis The Wise? I thought not. It’s not a story the Jedi would tell you. It’s a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself.</h2>\r\n</html>\r\n");
+    fprintf(r->file, "<h2> Did you ever hear the tragedy of Darth Plagueis The Wise? I thought not. It’s not a story the Jedi would tell you. It’s a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself.</h2>\r\n</html>\r\n");
  fprintf(r->file, "<center><img src=\"https://i.pinimg.com/736x/4f/bc/25/4fbc2592546f47baf823e95eaf2fc93a--error-star-wars-costumes.jpg\"></center>");
     /* Return specified status */
     return status;

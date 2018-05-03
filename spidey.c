@@ -46,7 +46,7 @@ void usage(const char *progname, int status) {
 bool parse_options(int argc, char *argv[], ServerMode *mode) {
   int argind = 1;
 
-  PROGRAM_NAME = argv[0];
+  char *PROGRAM_NAME = argv[0];
   while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-') {   /* 8 */
       char *arg = argv[argind++];
       switch (arg[1]) {
@@ -66,11 +66,15 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
               MimeTypesPath = argv[argind++];
               break;
             case 'c':
-              if(streq(argv[argind++], "forking"))
+              if (streq(argv[argind++], "forking"))
               {
-                  mode = fork;
-              } else {
-                  mode = single;
+                  *mode = FORKING;
+              } 
+              else if (streq(argv[argind++], "single")){
+                  *mode = SINGLE;  
+              }
+              else {
+                  *mode = UNKNOWN;
               }
               break;
             default:
@@ -88,7 +92,7 @@ int main(int argc, char *argv[]) {
     ServerMode mode;
 
     /* Parse command line options */
-    bool parsed = parse_options(argc, argv, mode);
+    bool parsed = parse_options(argc, argv, &mode);
     if(!parsed){
       fprintf(stderr, "Could not parse... %s\n", strerror(errno));
       return EXIT_FAILURE;
@@ -97,7 +101,7 @@ int main(int argc, char *argv[]) {
     /* Listen to server socket */
 
     int FD = socket_listen(Port);
-    if(sfd == -1){
+    if(FD == -1){
       fprintf(stderr, "Unable to open file... %s\n", strerror(errno));
       return EXIT_FAILURE;
     }
@@ -115,10 +119,10 @@ int main(int argc, char *argv[]) {
     debug("ConcurrencyMode = %s", mode == SINGLE ? "Single" : "Forking");
 
     /* Start either forking or single HTTP server */
-    if(mode == single){
+    if(mode == SINGLE){
       single_server(FD);
-    } else if (mode == fork) {
-      forking_server(FD)
+    } else if (mode == FORKING) {
+      forking_server(FD);
     } else {
       fprintf(stderr, "Unable to start server... %s\n", strerror(errno));
       return EXIT_FAILURE;

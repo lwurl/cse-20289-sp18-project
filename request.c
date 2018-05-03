@@ -30,40 +30,56 @@ int parse_request_headers(Request *r);
 Request * accept_request(int sfd) {
     Request *r;
     struct sockaddr raddr;
-    socklen_t rlen = sizeof(struct sockaddr);
+    socklen_t rlen; //sizeof(struct sockaddr);
+    puts("start accept");
+
+    printf("%d", sfd);
 
     /* Allocate request struct (zeroed) */
 
-    if(!r = calloc(sizeof(struct request),1))
+    if(!(r = calloc(sizeof(Request),1)))
     {
-      fprintf(stderr, "Unable to calloc... %s\n",strerr(errno));
+      fprintf(stderr, "Unable to calloc... %s\n",strerror(errno));
       goto fail;
     }
     r->headers = NULL;
     //r->headers = calloc(sizeof(struct header), 1);
 
+    puts("before client");
+    
+    //int b = bind(sfd, (struct sockaddr *)&saddr, sizeof(saddr));
+    //printf("%d", b);
+    
     /* Accept a client */
 
+    printf("%d", sfd);
+    puts("hahshd");
+
+    accept(sfd, &raddr, &rlen);
+    puts("hai");
+    //printf("%d", c);
+    
     if((r->fd = accept(sfd, &raddr, &rlen)) < 0)
     {
-      fprintf(stderr,"Unable to accept... %s\n",strerr(errno));
+      puts("faile");
+      fprintf(stderr,"Unable to accept... %s\n",strerror(errno));
       goto fail;
     }
 
-
+    puts("after client");
 
     /* Lookup client information */
 
-    if(getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), (NI_NUMERICHOST | NI_NUMERCSERV)) != 0)
+    if(getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), (NI_NUMERICHOST | NI_NUMERICSERV)) != 0)
     {
-      fprintf(stderr, "Unable to getnameinfo... %s\n",strerr(errno));
+      fprintf(stderr, "Unable to getnameinfo... %s\n",strerror(errno));
       goto fail;
     }
     /* Open socket stream */
 
     if((r->file = fdopen(r->fd, "w+")) == NULL)
     {
-      fprintf(stderr, "Unable to fdopen... %s\n", strerr(errno));
+      fprintf(stderr, "Unable to fdopen... %s\n", strerror(errno));
       goto fail;
     }
 
@@ -72,6 +88,7 @@ Request * accept_request(int sfd) {
 
 fail:
     /* Deallocate request struct */
+    puts("hisdfihosd");
     free_request(r);
     return NULL;
 }
@@ -112,7 +129,7 @@ void free_request(Request *r) {
 
     /* Free headers */
     struct header *prev;
-    header = r->headers;
+    struct header *header = r->headers;
     while (header != NULL){
         free(header->name);
         free(header->value);

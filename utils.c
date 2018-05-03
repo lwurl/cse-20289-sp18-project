@@ -111,12 +111,12 @@ char * determine_request_path(const char *uri) {
     strcpy(path, RootPath);
     strcat(path, uri);
 
-    int len_root = strlen(Rootpath);
+    int len_root = strlen(RootPath);
     realpath(path, real_path_str);
     if (real_path_str == NULL){
         return NULL;
     }
-    if (strcmp(real_path_str, Rootpath, len_root) != 0){
+    if (strncmp(real_path_str, RootPath, len_root) != 0){
         return NULL;
     }
 
@@ -140,19 +140,19 @@ const char * http_status_string(HTTPStatus status) {
         "418 I'm A Teapot",
     };
     const char *str;
-    if (status == HTTP_OK){
+    if (status == HTTP_STATUS_OK){
         str = StatusStrings[0];
     }
-    else if (status == HTTP_BAD_REQUEST){
+    else if (status == HTTP_STATUS_BAD_REQUEST){
         str = StatusStrings[1];
     }
-    else if (status == HTTP_NOT_FOUND){
+    else if (status == HTTP_STATUS_NOT_FOUND){
         str = StatusStrings[2];
     }
-    else if (status == HTTP_INTERNAL_SERVER_ERROR){
+    else if (status == HTTP_STATUS_INTERNAL_SERVER_ERROR){
         str = StatusStrings[3];
     }
-    else if (status == HTTP_I_AM_A_TEAPOT){
+    else if (status == HTTP_STATUS_I_AM_A_TEAPOT){
         str = StatusStrings[4];
     }
 

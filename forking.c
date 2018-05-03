@@ -40,7 +40,7 @@ int forking_server(int sfd) {
             return(EXIT_SUCCESS);
         }
         else{
-            free_request(request);]
+            free_request(request);
             return(EXIT_FAILURE);
         }
 
