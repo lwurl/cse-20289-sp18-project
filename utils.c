@@ -39,12 +39,52 @@ char * determine_mimetype(const char *path) {
     FILE *fs = NULL;
 
     /* Find file extension */
+    ext = strchr(path, '.');
+    ext++;
 
     /* Open MimeTypesPath file */
+    if ( (fs = fopen(MimeTypesPath, "r")) == NULL){
+        goto fail;
+    }
 
     /* Scan file for matching file extensions */
+    while (fgets(buffer, BUFSIZ, fs) && sizeof(buffer) > 2){
+        chomp(buffer);
 
-    return NULL;
+        mimetype = strtok(buffer, WHITESPACE);
+
+        // If there was nothing or it is a comment
+        if (mimetype == NULL || mimetype[0] == '#'){
+            continue;
+        }
+
+        
+        // Get past the <MIMETYPE> part
+        token = skip_nonwhitespace(buffer);
+
+        // Get to the <EXT1> part
+        token = skip_whitespace(token);
+
+        token = strtok(token, WHITESPACE);
+
+        while (token != NULL){
+            // Found
+            if (streq(token, ext)){
+                goto complete;
+            }
+            // Keep looking
+            token = strtok(NULL, WHITESPACE);
+        }
+    }
+
+fail:
+    mimetype = DefaultMimeType;
+    
+complete:
+    if (fs){
+        fclose(fs);
+    }
+    return strdup(mimetype);
 }
 
 /**
@@ -64,7 +104,23 @@ char * determine_mimetype(const char *path) {
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    return NULL;
+    char real_path_str[BUFSIZ];
+    char path[BUFSIZ];
+
+    // Construct the path with root and the uri
+    strcpy(path, RootPath);
+    strcat(path, uri);
+
+    int len_root = strlen(Rootpath);
+    realpath(path, real_path_str);
+    if (real_path_str == NULL){
+        return NULL;
+    }
+    if (strcmp(real_path_str, Rootpath, len_root) != 0){
+        return NULL;
+    }
+
+    return strdup(real_path_str);
 }
 
 /**
@@ -83,8 +139,24 @@ const char * http_status_string(HTTPStatus status) {
         "500 Internal Server Error",
         "418 I'm A Teapot",
     };
+    const char *str;
+    if (status == HTTP_OK){
+        str = StatusStrings[0];
+    }
+    else if (status == HTTP_BAD_REQUEST){
+        str = StatusStrings[1];
+    }
+    else if (status == HTTP_NOT_FOUND){
+        str = StatusStrings[2];
+    }
+    else if (status == HTTP_INTERNAL_SERVER_ERROR){
+        str = StatusStrings[3];
+    }
+    else if (status == HTTP_I_AM_A_TEAPOT){
+        str = StatusStrings[4];
+    }
 
-    return NULL;
+    return str;
 }
 
 /**
@@ -94,6 +166,9 @@ const char * http_status_string(HTTPStatus status) {
  * @return  Point to first whitespace character in s.
  **/
 char * skip_nonwhitespace(char *s) {
+    while (isspace(*s)){
+        s++;
+    }
     return s;
 }
 
@@ -104,6 +179,9 @@ char * skip_nonwhitespace(char *s) {
  * @return  Point to first non-whitespace character in s.
  **/
 char * skip_whitespace(char *s) {
+    while (!isspace(*s)){
+        ++s;
+    }
     return s;
 }
 
