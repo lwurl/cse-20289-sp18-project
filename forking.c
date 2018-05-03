@@ -18,7 +18,7 @@
  * handle the request.
  **/
 int forking_server(int sfd) {
-    struct request * request;
+    Request * request;
     pid_t pid;
 
     signal(SIGCHLD, SIG_IGN);
