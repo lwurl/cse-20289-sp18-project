@@ -129,6 +129,13 @@ void free_request(Request *r) {
     /* Free allocated strings */
     //puts("2");
 
+    // Extra
+    
+    /*debug("HTTP METHOD: %p", &r->method);
+    debug("HTTP URI:    %p", &r->uri);
+    debug("HTTP QUERY:  %p", &r->query);*/
+
+
     /*free(r->method);
     free(r->path);
     if (r->query){

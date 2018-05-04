@@ -93,10 +93,15 @@ HTTPStatus  handle_browse_request(Request *r) {
     /* For each entry in directory, emit HTML list item */
     fputs("<ul>\r\n", r->file);
     //fputs("<ul>", r->file);
-    for (size_t i = 0; i < n; i++) {
-        if (entries[i]->d_name && !streq(entries[i]->d_name, ".")) {
-            fprintf(r->file, "<li><a href=\"%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
-        }
+    for (size_t i = 1; i < n; i++) {
+        if (streq(r->uri, "/"))
+            fprintf(r->file, "<li><a href=\"/%s%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
+        else
+            fprintf(r->file, "<li><a href=\"/%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
+
+        /*if (entries[i]->d_name && !streq(entries[i]->d_name, ".")) {
+            fprintf(r->file, "<li><a href=\"/%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
+        }*/
         free(entries[i]);
     }
     free(entries);

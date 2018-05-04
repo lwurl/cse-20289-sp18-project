@@ -7,6 +7,7 @@ Members
 - Luke Wurl (lwurl@nd.edu)
 - Sam MacGinty (smacgint@nd.edu)
 - James Philhower (jphilhow@nd.edu)
+- Soren Holm (sholm@nd.edu)
 
 Demonstration
 -------------
