@@ -23,8 +23,9 @@ int single_server(int sfd) {
         /* Accept request */
         request = accept_request(sfd);
         if (request == NULL){
-            fprintf(stderr, "Failed to accept reequest: %s", strerror(errno));
+            fprintf(stderr, "Failed to accept request: %s", strerror(errno));
             return EXIT_FAILURE;
+            //continue;
         }
 
 

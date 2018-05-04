@@ -34,7 +34,7 @@ Request * accept_request(int sfd) {
     socklen_t rlen = sizeof(struct sockaddr);
     //puts("start accept");
 
-    printf("%d", sfd);
+    //printf("%d", sfd);
 
     /* Allocate request struct (zeroed) */
     r = calloc(sizeof(Request), 1);
@@ -54,7 +54,7 @@ Request * accept_request(int sfd) {
     
     /* Accept a client */
 
-    printf("%d", sfd);
+    //printf("%d", sfd);
     //puts("hahshd");
 
     r->fd = accept(sfd, &raddr, &rlen);
@@ -116,16 +116,18 @@ void free_request(Request *r) {
     //puts("after");
     /* Close socket or fd */
 
-    if(r->file)
-    {
-      //puts("asd");
-      fclose(r->file);
-    }
-    if(r->fd != -1)
-    {
-      //puts("fd");
-      close(r->fd);
-    }
+    //if (streq(r->query,"")){
+        if(r->file)
+        {
+            //puts("asd");
+            fclose(r->file);
+        }
+        if(r->fd != -1)
+        {
+            //puts("fd");
+            close(r->fd);
+        }
+    //}
     /* Free allocated strings */
     //puts("2");
 
@@ -136,24 +138,30 @@ void free_request(Request *r) {
     debug("HTTP QUERY:  %p", &r->query);*/
 
 
-    /*free(r->method);
+    free(r->method);
     free(r->path);
-    if (r->query){
-        free(r->query); // if statement ?
-    }
-    free(r->uri);*/
+    //if (r->query){
+    free(r->query); // if statement ?
+    //}
+    free(r->uri);
+    //free(r->host);
+    //free(r->port);
 
     /* Free headers */
     Header *header = r->headers;
     Header *n;
     while (header != NULL){
         //puts("inside while");
-        n = header->next;
+        //n = header->next;
         free(header->name);
         free(header->value);
-        free(header);
-        header = n;
+        //free(header);
+        n = header;
+        header = header->next;
+        free(n);
     }
+    //free(r->headers);
+    
 
     /* Free request */
     free(r);
@@ -235,6 +243,10 @@ int parse_request_method(Request *r) {
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
     debug("HTTP QUERY:  %s", r->query);
+
+    //free(r->method);
+    //free(r->uri);
+    //free(r->query);
 
     return 0;
 

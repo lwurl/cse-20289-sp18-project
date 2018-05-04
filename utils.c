@@ -33,9 +33,9 @@
  **/
 char * determine_mimetype(const char *path) {
     //puts("mintype");
-    char *ext;
+    char *ext = NULL;
     char *mimetype;
-    char *token;
+    char *token = NULL;
     char buffer[BUFSIZ];
     FILE *fs = NULL;
     
@@ -69,7 +69,7 @@ char * determine_mimetype(const char *path) {
         // Get to the <EXT1> part
         token = skip_whitespace(token);
 
-        token = strtok(token, WHITESPACE);
+        //token = strtok(token, WHITESPACE);
 
         while (token != NULL){
             // Found

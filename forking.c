@@ -32,17 +32,19 @@ int forking_server(int sfd) {
         if(pid == -1){
             close(sfd);
             free_request(request);
-            return(EXIT_FAILURE);
+            //return(EXIT_FAILURE);
+            continue;
         }
         else if(pid == 0){
             close(sfd);
             handle_request(request);
-            return(EXIT_SUCCESS);
+            free_request(request);
+            exit(EXIT_SUCCESS);
         }
         else{
-            close(sfd);
+            //close(sfd);
             free_request(request);
-            return(EXIT_FAILURE);
+            //return(EXIT_SUCCESS);
         }
 
 	/* Fork off child process to handle request */

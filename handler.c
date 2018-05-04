@@ -44,9 +44,11 @@ HTTPStatus  handle_request(Request *r) {
     /* Dispatch to appropriate request handler type based on file type */
 
     struct stat s;
-    if(lstat(r->path, &s) != 0){
+    if(stat(r->path, &s) != 0){
+        puts("error lstat");
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
     }
+    puts(r->path);
     if((s.st_mode & S_IFMT) == S_IFDIR){
         result = handle_browse_request(r);
         debug("HTTP REQUEST TYPE: BROWSE");
@@ -94,16 +96,16 @@ HTTPStatus  handle_browse_request(Request *r) {
     fputs("<ul>\r\n", r->file);
     //fputs("<ul>", r->file);
     for (size_t i = 1; i < n; i++) {
-        if (streq(r->uri, "/"))
+        if (streq(r->uri, "/")){
             fprintf(r->file, "<li><a href=\"/%s%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
-        else
+        }
+        else{
             fprintf(r->file, "<li><a href=\"/%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
-
-        /*if (entries[i]->d_name && !streq(entries[i]->d_name, ".")) {
-            fprintf(r->file, "<li><a href=\"/%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
-        }*/
+        }
+        
         free(entries[i]);
     }
+    free(entries[0]);
     free(entries);
     fputs("</ul>\r\n", r->file);
 
@@ -131,7 +133,10 @@ HTTPStatus  handle_file_request(Request *r) {
     size_t nread;
 
     /* Open file for reading */
-    if(!(fs = fopen(r->path, "r+"))){
+    puts(r->path);
+    if(!(fs = fopen(r->path, "r"))){
+        puts("not opening");
+        return handle_error(r, HTTP_STATUS_NOT_FOUND);
         goto fail;
     }
     /* Determine mimetype */
@@ -150,7 +155,10 @@ HTTPStatus  handle_file_request(Request *r) {
 
 fail:
     /* Close file, free mimetype, return INTERNAL_SERVER_ERROR */
+    //fclose(fs);
+    //free(mimetype);
     return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    //return handle_error(r, HTTP_STATUS_NOT_FOUND);
 }
 
 /**

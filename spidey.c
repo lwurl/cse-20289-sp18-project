@@ -106,17 +106,19 @@ int main(int argc, char *argv[]) {
     //puts(Port);
 
     int FD = socket_listen(Port);
-    printf("%d", FD);
+    //printf("%d", FD);
     if(FD == -1){
       fprintf(stderr, "Unable to open file... %s\n", strerror(errno));
       close(FD);
       return EXIT_FAILURE;
     }
 
-    if((RootPath = realpath(RootPath, NULL)) == NULL){
+    char buf[BUFSIZ];
+    RootPath = realpath(RootPath, buf);
+    /*if((RootPath = realpath(RootPath, NULL)) == NULL){
       fprintf(stderr, "Unable to find real path... %s\n", strerror(errno));
       return EXIT_FAILURE;
-    }
+    }*/
     /* Determine real RootPath */
 
     log("Listening on port %s", Port);
