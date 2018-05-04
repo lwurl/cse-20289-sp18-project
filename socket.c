@@ -37,27 +37,27 @@ int socket_listen(const char *port) {
     /* For each server entry, allocate socket and try to connect */
     int socket_fd = -1;
     for (struct addrinfo *p = results; p != NULL && socket_fd < 0; p = p->ai_next) {
-	/* Allocate socket */
-      if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
-        fprintf(stderr, "Unable to make socket: %s\n", strerror(errno));
-        continue;
-      }
+        /* Allocate socket */
+        if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
+            fprintf(stderr, "Unable to make socket: %s\n", strerror(errno));
+            continue;
+        }
 
 	/* Bind socket */
-    if (bind(socket_fd, p->ai_addr, p->ai_addrlen) < 0) {
-      fprintf(stderr, "Unable to bind: %s\n", strerror(errno));
-      close(socket_fd);
-      socket_fd = -1;
-      continue;
-    }
+        if (bind(socket_fd, p->ai_addr, p->ai_addrlen) < 0) {
+            fprintf(stderr, "Unable to bind: %s\n", strerror(errno));
+            close(socket_fd);
+            socket_fd = -1;
+            continue;
+        }
 
     	/* Listen to socket */
-    if (listen(socket_fd, SOMAXCONN) < 0) {
+        if (listen(socket_fd, SOMAXCONN) < 0) {
 	     fprintf(stderr, "Unable to listen: %s\n", strerror(errno));
 	     close(socket_fd);
 	     socket_fd = -1;
 	     continue;
-	   }
+	}
 
     }
 

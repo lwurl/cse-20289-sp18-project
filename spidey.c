@@ -44,6 +44,7 @@ void usage(const char *progname, int status) {
  * if specified.
  */
 bool parse_options(int argc, char *argv[], ServerMode *mode) {
+  puts("parsing");
   int argind = 1;
 
   char *PROGRAM_NAME = argv[0];
@@ -99,10 +100,13 @@ int main(int argc, char *argv[]) {
     }
 
     /* Listen to server socket */
+    puts(Port);
 
     int FD = socket_listen(Port);
+    printf("%d", FD);
     if(FD == -1){
       fprintf(stderr, "Unable to open file... %s\n", strerror(errno));
+      close(FD);
       return EXIT_FAILURE;
     }
 

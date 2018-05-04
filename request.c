@@ -28,22 +28,24 @@ int parse_request_headers(Request *r);
  * The returned request struct must be deallocated using free_request.
  **/
 Request * accept_request(int sfd) {
+    puts("accept_req");
     Request *r;
     struct sockaddr raddr;
-    socklen_t rlen; //sizeof(struct sockaddr);
+    socklen_t rlen = sizeof(struct sockaddr);
     puts("start accept");
 
     printf("%d", sfd);
 
     /* Allocate request struct (zeroed) */
+    r = calloc(sizeof(Request), 1);
 
-    if(!(r = calloc(sizeof(Request),1)))
+    if(r == NULL)
     {
       fprintf(stderr, "Unable to calloc... %s\n",strerror(errno));
       goto fail;
     }
-    r->headers = NULL;
-    //r->headers = calloc(sizeof(struct header), 1);
+    //r->headers = NULL;
+    r->headers = calloc(sizeof(Header), 1);
 
     puts("before client");
     
@@ -55,11 +57,11 @@ Request * accept_request(int sfd) {
     printf("%d", sfd);
     puts("hahshd");
 
-    accept(sfd, &raddr, &rlen);
+    r->fd = accept(sfd, &raddr, &rlen);
     puts("hai");
     //printf("%d", c);
     
-    if((r->fd = accept(sfd, &raddr, &rlen)) < 0)
+    if(r->fd  < 0)
     {
       puts("faile");
       fprintf(stderr,"Unable to accept... %s\n",strerror(errno));
@@ -106,6 +108,7 @@ fail:
  *  4. Frees request struct.
  **/
 void free_request(Request *r) {
+    puts("free req");
     if (!r) {
     	return;
     }
@@ -152,6 +155,7 @@ void free_request(Request *r) {
  * headers, returning 0 on success, and -1 on error.
  **/
 int parse_request(Request *r) {
+    puts("pars req");
     /* Parse HTTP Request Method */
     /* Parse HTTP Requet Headers*/
     if (parse_request_method(r) != 0 || parse_request_headers(r) != 0)
@@ -177,6 +181,7 @@ int parse_request(Request *r) {
  * This function extracts the method, uri, and query (if it exists).
  **/
 int parse_request_method(Request *r) {
+    puts("parse req method");
     char buffer[BUFSIZ];
     char *method;
     char *uri;
@@ -250,6 +255,7 @@ fail:
  *      headers.append(header)
  **/
 int parse_request_headers(Request *r) {
+    puts("parse req headers");
     struct header *curr = NULL;
     char buffer[BUFSIZ];
     char *name;

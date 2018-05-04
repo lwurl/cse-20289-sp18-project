@@ -14,6 +14,7 @@
  * @return  Exit status of server (EXIT_SUCCESS).
  **/
 int single_server(int sfd) {
+    puts("single.c");
     Request *request;
     
     /* Accept and handle HTTP request */

@@ -18,6 +18,7 @@
  * handle the request.
  **/
 int forking_server(int sfd) {
+    puts("forking serv");
     Request * request;
     pid_t pid;
 

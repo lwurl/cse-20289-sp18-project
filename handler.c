@@ -28,6 +28,7 @@ HTTPStatus handle_error(Request *request, HTTPStatus status);
  * On error, handle_error should be used with an appropriate HTTP status code.
  **/
 HTTPStatus  handle_request(Request *r) {
+    puts("handle_req");
     HTTPStatus result;
 
     /* Parse request */
@@ -75,6 +76,7 @@ HTTPStatus  handle_request(Request *r) {
  * with HTTP_STATUS_NOT_FOUND.
  **/
 HTTPStatus  handle_browse_request(Request *r) {
+    puts("handle browse");
     struct dirent **entries;
     int n;
 
@@ -114,6 +116,7 @@ HTTPStatus  handle_browse_request(Request *r) {
  * HTTP_STATUS_NOT_FOUND.
  **/
 HTTPStatus  handle_file_request(Request *r) {
+    puts("handle file");
     FILE *fs;
     char buffer[BUFSIZ];
     char *mimetype = NULL;
@@ -155,6 +158,7 @@ fail:
  * HTTP_STATUS_INTERNAL_SERVER_ERROR.
  **/
 HTTPStatus handle_cgi_request(Request *r) {
+    puts("handle cgi");
     FILE *pfs;
     char buffer[BUFSIZ];
 
