@@ -32,17 +32,18 @@
  * This function returns an allocated string that must be free'd.
  **/
 char * determine_mimetype(const char *path) {
-    puts("mintype");
+    //puts("mintype");
     char *ext;
     char *mimetype;
     char *token;
     char buffer[BUFSIZ];
     FILE *fs = NULL;
     
-    puts("determine");
+    //puts("determine");
 
     /* Find file extension */
-    ext = strchr(path, '.');
+    
+    ext = strrchr(path, '.'); // or strchr?
     ext++;
 
     /* Open MimeTypesPath file */
@@ -107,7 +108,7 @@ complete:
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    puts("deter req");
+    //puts("deter req");
     char real_path_str[BUFSIZ];
     char path[BUFSIZ];
 
@@ -136,7 +137,7 @@ char * determine_request_path(const char *uri) {
  * http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
  **/
 const char * http_status_string(HTTPStatus status) {
-    puts("http status");
+    //puts("http status");
     static char *StatusStrings[] = {
         "200 OK",
         "400 Bad Request",

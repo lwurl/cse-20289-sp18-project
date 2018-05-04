@@ -18,7 +18,7 @@
  * handle the request.
  **/
 int forking_server(int sfd) {
-    puts("forking serv");
+    //puts("forking serv");
     Request * request;
     pid_t pid;
 
@@ -30,17 +30,17 @@ int forking_server(int sfd) {
         if(request == NULL){continue;}
         pid=fork();
         if(pid == -1){
+            close(sfd);
             free_request(request);
             return(EXIT_FAILURE);
         }
-
-	/* Ignore children */
-        if(pid == 0){
+        else if(pid == 0){
             close(sfd);
             handle_request(request);
             return(EXIT_SUCCESS);
         }
         else{
+            close(sfd);
             free_request(request);
             return(EXIT_FAILURE);
         }

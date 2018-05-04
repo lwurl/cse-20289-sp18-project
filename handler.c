@@ -28,7 +28,7 @@ HTTPStatus handle_error(Request *request, HTTPStatus status);
  * On error, handle_error should be used with an appropriate HTTP status code.
  **/
 HTTPStatus  handle_request(Request *r) {
-    puts("handle_req");
+    //puts("handle_req");
     HTTPStatus result;
 
     /* Parse request */
@@ -49,17 +49,20 @@ HTTPStatus  handle_request(Request *r) {
     }
     if((s.st_mode & S_IFMT) == S_IFDIR){
         result = handle_browse_request(r);
+        debug("HTTP REQUEST TYPE: BROWSE");
     }
     else if(access(r->path, X_OK) == 0){
         result = handle_cgi_request(r);
+        debug("HTTP REQUEST TYPE: CGI");
     }
     else if(access(r->path, R_OK) == 0){
         result = handle_file_request(r);
+        debug("HTTP REQUEST TYPE: FILE");
     }
     else{
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
     }
-
+    
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
     return result;
 }
@@ -76,7 +79,7 @@ HTTPStatus  handle_request(Request *r) {
  * with HTTP_STATUS_NOT_FOUND.
  **/
 HTTPStatus  handle_browse_request(Request *r) {
-    puts("handle browse");
+    //puts("handle browse");
     struct dirent **entries;
     int n;
 
@@ -88,16 +91,16 @@ HTTPStatus  handle_browse_request(Request *r) {
     /* Write HTTP Header with OK Status and text/html Content-Type */
     fputs("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n", r->file);
     /* For each entry in directory, emit HTML list item */
-    fputs("<html>\r\n", r->file);
-    fputs("<ul>", r->file);
+    fputs("<ul>\r\n", r->file);
+    //fputs("<ul>", r->file);
     for (size_t i = 0; i < n; i++) {
         if (entries[i]->d_name && !streq(entries[i]->d_name, ".")) {
-            fprintf(r->file, "<li><a href=\"%s/%s\">%s</a></li>", r->uri+1, entries[i]->d_name, entries[i]->d_name);
+            fprintf(r->file, "<li><a href=\"%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
         }
         free(entries[i]);
     }
     free(entries);
-    fputs("</ul></html>\r\n", r->file);
+    fputs("</ul>\r\n", r->file);
 
     /* Flush socket, return OK */
     fflush(r->file);
@@ -116,7 +119,7 @@ HTTPStatus  handle_browse_request(Request *r) {
  * HTTP_STATUS_NOT_FOUND.
  **/
 HTTPStatus  handle_file_request(Request *r) {
-    puts("handle file");
+    //puts("handle file");
     FILE *fs;
     char buffer[BUFSIZ];
     char *mimetype = NULL;
@@ -158,7 +161,7 @@ fail:
  * HTTP_STATUS_INTERNAL_SERVER_ERROR.
  **/
 HTTPStatus handle_cgi_request(Request *r) {
-    puts("handle cgi");
+    //puts("handle cgi");
     FILE *pfs;
     char buffer[BUFSIZ];
 
@@ -173,40 +176,57 @@ HTTPStatus handle_cgi_request(Request *r) {
     setenv("REMOTE_PORT", r->port, 1);
     setenv("SCRIPT_FILENAME", r->path, 1);
 
-
+    //puts("before setnve");
     /* Export CGI environment variables from request headers */
     setenv("DOCUMENT_ROOT", RootPath, 1);
-    struct header *header = r->headers;
+    Header *header = r->headers;
 
     while(header){
 
-
-        if(streq(header->name, "Host")){
+        //puts("top while");
+        if(header->name && streq(header->name, "Host")){
+            //puts("0");
             char *port = strchr(header->value, ':')+1;
             char *host = strtok(header->value, ":");
+            //puts("mid1");
             setenv("HTTP_HOST", host, 1);
             setenv("SERVER_PORT", port, 1);
+            //puts("2");
         }
 
-        else if(streq(header->name, "Accept-Language"))
+        else if(header->name && streq(header->name, "Accept-Language")){
+            //puts("3");
             setenv("HTTP_ACCEPT_LANGUAGE", header->value, 1);
+        }
 
-        else if(streq(header->name, "Port"))
+        else if(header->name && streq(header->name, "Port")){
+            //puts("4");
             setenv("HTTP_HOST", header->value, 1);
+        }
 
-        else if(streq(header->name, "Accept-Encoding"))
+        else if(header->name && streq(header->name, "Accept-Encoding")){
+            //puts("5");
             setenv("HTTP_ACCEPT_ENCODING", header->value, 1);
+        }
 
-        else if(streq(header->name, "User-Agent"))
+        else if(header->name && streq(header->name, "User-Agent")){
+            //puts("6");
             setenv("HTTP_USER_AGENT", header->value, 1);
+        }
 
-        else if(streq(header->name, "Connection"))
+        else if(header->name && streq(header->name, "Connection")){
+            //puts("7");
             setenv("HTTP_CONNECTION", header->value, 1);
+        }
 
-        else if(streq(header->name, "Accept"))
+        else if(header->name && streq(header->name, "Accept")){
+            //puts("8");
             setenv("HTTP_ACCEPT", header->value, 1);
+        }
 
+        //puts("beofre next");
         header = header->next;
+        //puts("end while");
     }
 
 

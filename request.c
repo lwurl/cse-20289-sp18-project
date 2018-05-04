@@ -28,11 +28,11 @@ int parse_request_headers(Request *r);
  * The returned request struct must be deallocated using free_request.
  **/
 Request * accept_request(int sfd) {
-    puts("accept_req");
+    //puts("accept_req");
     Request *r;
     struct sockaddr raddr;
     socklen_t rlen = sizeof(struct sockaddr);
-    puts("start accept");
+    //puts("start accept");
 
     printf("%d", sfd);
 
@@ -47,7 +47,7 @@ Request * accept_request(int sfd) {
     //r->headers = NULL;
     r->headers = calloc(sizeof(Header), 1);
 
-    puts("before client");
+    //puts("before client");
     
     //int b = bind(sfd, (struct sockaddr *)&saddr, sizeof(saddr));
     //printf("%d", b);
@@ -55,20 +55,20 @@ Request * accept_request(int sfd) {
     /* Accept a client */
 
     printf("%d", sfd);
-    puts("hahshd");
+    //puts("hahshd");
 
     r->fd = accept(sfd, &raddr, &rlen);
-    puts("hai");
+    //puts("hai");
     //printf("%d", c);
     
     if(r->fd  < 0)
     {
-      puts("faile");
+      //puts("faile");
       fprintf(stderr,"Unable to accept... %s\n",strerror(errno));
       goto fail;
     }
 
-    puts("after client");
+    //puts("after client");
 
     /* Lookup client information */
 
@@ -82,6 +82,7 @@ Request * accept_request(int sfd) {
     if((r->file = fdopen(r->fd, "w+")) == NULL)
     {
       fprintf(stderr, "Unable to fdopen... %s\n", strerror(errno));
+      fclose(r->file);
       goto fail;
     }
 
@@ -90,7 +91,7 @@ Request * accept_request(int sfd) {
 
 fail:
     /* Deallocate request struct */
-    puts("hisdfihosd");
+    //puts("hisdfihosd");
     free_request(r);
     return NULL;
 }
@@ -108,37 +109,43 @@ fail:
  *  4. Frees request struct.
  **/
 void free_request(Request *r) {
-    puts("free req");
+    //puts("free req");
     if (!r) {
     	return;
     }
-
+    //puts("after");
     /* Close socket or fd */
 
     if(r->file)
     {
+      //puts("asd");
       fclose(r->file);
     }
     if(r->fd != -1)
     {
+      //puts("fd");
       close(r->fd);
     }
     /* Free allocated strings */
-    
-    free(r->method);
+    //puts("2");
+
+    /*free(r->method);
     free(r->path);
-    free(r->query); // if statement ?
-    free(r->uri);
+    if (r->query){
+        free(r->query); // if statement ?
+    }
+    free(r->uri);*/
 
     /* Free headers */
-    struct header *prev;
-    struct header *header = r->headers;
+    Header *header = r->headers;
+    Header *n;
     while (header != NULL){
+        //puts("inside while");
+        n = header->next;
         free(header->name);
         free(header->value);
-        prev = header;
-        header = header->next;
-        free(prev);
+        free(header);
+        header = n;
     }
 
     /* Free request */
@@ -155,7 +162,7 @@ void free_request(Request *r) {
  * headers, returning 0 on success, and -1 on error.
  **/
 int parse_request(Request *r) {
-    puts("pars req");
+    //puts("pars req");
     /* Parse HTTP Request Method */
     /* Parse HTTP Requet Headers*/
     if (parse_request_method(r) != 0 || parse_request_headers(r) != 0)
@@ -181,7 +188,7 @@ int parse_request(Request *r) {
  * This function extracts the method, uri, and query (if it exists).
  **/
 int parse_request_method(Request *r) {
-    puts("parse req method");
+    //puts("parse req method");
     char buffer[BUFSIZ];
     char *method;
     char *uri;
@@ -196,7 +203,8 @@ int parse_request_method(Request *r) {
     
     /* Parse method and uri */
     
-    method = strtok(skip_whitespace(buffer), WHITESPACE);
+    method = strtok(buffer, WHITESPACE);
+    //temp = '\0';
     uri = strtok(NULL, WHITESPACE);
     
     /* Parse query from uri */
@@ -255,8 +263,8 @@ fail:
  *      headers.append(header)
  **/
 int parse_request_headers(Request *r) {
-    puts("parse req headers");
-    struct header *curr = NULL;
+    //puts("parse req headers");
+    Header *curr = r->headers;
     char buffer[BUFSIZ];
     char *name;
     char *value;
@@ -264,20 +272,21 @@ int parse_request_headers(Request *r) {
     /* Parse headers from socket */
 
     while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2){
-        curr = calloc(sizeof(struct header), 1);
-        if (curr == NULL){
+        Header *next_h = calloc(sizeof(Header), 1);
+        chomp(buffer);
+        name = buffer;
+        char *before = strchr(buffer, ':');
+        char *after = before + 1;
+        skip_whitespace(after);
+        value = after;
+        *before = '\0';
+        next_h->name = strdup(name);
+        next_h->value = strdup(value);
+        if (!next_h->name || !next_h->value){
             goto fail;
         }
-        name = strtok(skip_whitespace(buffer), ":");
-        value = strtok(NULL, "\n");
-        chomp(value);
-        if (value == NULL){
-            goto fail;
-        }
-        curr->name = strdup(name);
-        curr->value = strdup(value);
-        curr->next = r->headers;
-        r->headers = curr;
+        curr->next = next_h;
+        curr = curr->next;
     }
 
 #ifndef NDEBUG

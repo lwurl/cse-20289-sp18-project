@@ -44,7 +44,7 @@ void usage(const char *progname, int status) {
  * if specified.
  */
 bool parse_options(int argc, char *argv[], ServerMode *mode) {
-  puts("parsing");
+  //puts("parsing");
   int argind = 1;
 
   char *PROGRAM_NAME = argv[0];
@@ -76,6 +76,7 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
               }
               else {
                   *mode = UNKNOWN;
+                  argind++;
               }
               break;
             default:
@@ -100,7 +101,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Listen to server socket */
-    puts(Port);
+    //puts(Port);
 
     int FD = socket_listen(Port);
     printf("%d", FD);
