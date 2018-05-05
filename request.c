@@ -224,7 +224,7 @@ int parse_request_method(Request *r) {
     
     /* Parse query from uri */
 
-    if ((query = strchr(uri, '?')))
+    if (uri && (query = strchr(uri, '?')))
     {
         *query = 0;
         ++query;
@@ -237,7 +237,9 @@ int parse_request_method(Request *r) {
     /* Record method, uri, and query in request struct */
 
     r->method = strdup(method);
-    r->uri = strdup(uri);
+    if (uri){
+        r->uri = strdup(uri);
+    }
     r->query = strdup(query);
 
     debug("HTTP METHOD: %s", r->method);

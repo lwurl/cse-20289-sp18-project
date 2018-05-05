@@ -47,6 +47,7 @@ HTTPStatus  handle_request(Request *r) {
     if(stat(r->path, &s) != 0){
         puts("error lstat");
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
+        goto done;
     }
     puts(r->path);
     if((s.st_mode & S_IFMT) == S_IFDIR){
@@ -65,6 +66,7 @@ HTTPStatus  handle_request(Request *r) {
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
     }
     
+done:
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
     return result;
 }
@@ -258,8 +260,8 @@ HTTPStatus handle_cgi_request(Request *r) {
     if(pclose(pfs)==-1){
         fprintf(stderr, "Failed to close stream... %s\n", strerror(errno));
     }
-    fclose(r->file);
-
+    //fclose(pfs);
+    fflush(r->file); 
     return HTTP_STATUS_OK;
 }
 

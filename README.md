@@ -7,12 +7,11 @@ Members
 - Luke Wurl (lwurl@nd.edu)
 - Sam MacGinty (smacgint@nd.edu)
 - James Philhower (jphilhow@nd.edu)
-- Soren Holm (sholm@nd.edu)
 
 Demonstration
 -------------
 
-Link to Presentation.
+https://docs.google.com/presentation/d/11AdS9JXf2DqBWTvgEGAgXpJrmcD40DVCSotuvn7ebCc/edit?ts=5aed0394#slide=id.p
 
 Errata
 ------
