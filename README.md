@@ -16,17 +16,16 @@ https://docs.google.com/presentation/d/11AdS9JXf2DqBWTvgEGAgXpJrmcD40DVCSotuvn7e
 Errata
 ------
 
-Summary of things that don't work (quite right).
 The website is working correctly online. We are not able to pass three
-of the tests in test_spidey. While we were never able to quite figure out
-what we were missing in handle errors part of the tests, we were able to
+of the tests in test_spidey dealing with handling errors. 
+While we were never able to quite figure out
+what we were missing in handle errors part of the tests, we weren't able to
 handle the Brose Requests until recently when we got the Cowsay to work on
-the internet again.
+our browser but now that is working correctly. We do have some memory errors
+that occur when certain parts of the server are accessed.
 
 Contributions
 -------------
-
-Enumeration of the contributions of each group member.
 
 Sam, Luke, and James all each worked on pieces individually prior to sharing
 the with the group. Each person took between 2 and three of the files to try
