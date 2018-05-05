@@ -18,13 +18,14 @@
  * handle the request.
  **/
 int forking_server(int sfd) {
-    //puts("forking serv");
     Request * request;
     pid_t pid;
 
     signal(SIGCHLD, SIG_IGN);
+
     /* Accept and handle HTTP request */
     while (true) {
+
     	/* Accept request */
         request = accept_request(sfd);
         if(request == NULL){continue;}
@@ -32,7 +33,6 @@ int forking_server(int sfd) {
         if(pid == -1){
             close(sfd);
             free_request(request);
-            //return(EXIT_FAILURE);
             continue;
         }
         else if(pid == 0){
@@ -42,9 +42,7 @@ int forking_server(int sfd) {
             exit(EXIT_SUCCESS);
         }
         else{
-            //close(sfd);
             free_request(request);
-            //return(EXIT_SUCCESS);
         }
 
 	/* Fork off child process to handle request */

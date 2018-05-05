@@ -28,13 +28,9 @@ int parse_request_headers(Request *r);
  * The returned request struct must be deallocated using free_request.
  **/
 Request * accept_request(int sfd) {
-    //puts("accept_req");
     Request *r;
     struct sockaddr raddr;
     socklen_t rlen = sizeof(struct sockaddr);
-    //puts("start accept");
-
-    //printf("%d", sfd);
 
     /* Allocate request struct (zeroed) */
     r = calloc(sizeof(Request), 1);
@@ -44,31 +40,17 @@ Request * accept_request(int sfd) {
       fprintf(stderr, "Unable to calloc... %s\n",strerror(errno));
       goto fail;
     }
-    //r->headers = NULL;
     r->headers = calloc(sizeof(Header), 1);
 
-    //puts("before client");
-    
-    //int b = bind(sfd, (struct sockaddr *)&saddr, sizeof(saddr));
-    //printf("%d", b);
-    
     /* Accept a client */
 
-    //printf("%d", sfd);
-    //puts("hahshd");
-
     r->fd = accept(sfd, &raddr, &rlen);
-    //puts("hai");
-    //printf("%d", c);
-    
+
     if(r->fd  < 0)
     {
-      //puts("faile");
       fprintf(stderr,"Unable to accept... %s\n",strerror(errno));
       goto fail;
     }
-
-    //puts("after client");
 
     /* Lookup client information */
 
@@ -91,7 +73,6 @@ Request * accept_request(int sfd) {
 
 fail:
     /* Deallocate request struct */
-    //puts("hisdfihosd");
     free_request(r);
     return NULL;
 }
@@ -109,30 +90,21 @@ fail:
  *  4. Frees request struct.
  **/
 void free_request(Request *r) {
-    //puts("free req");
     if (!r) {
     	return;
     }
-    //puts("after");
     /* Close socket or fd */
 
-    //if (streq(r->query,"")){
         if(r->file)
         {
-            //puts("asd");
             fclose(r->file);
         }
         if(r->fd != -1)
         {
-            //puts("fd");
             close(r->fd);
         }
-    //}
     /* Free allocated strings */
-    //puts("2");
 
-    // Extra
-    
     /*debug("HTTP METHOD: %p", &r->method);
     debug("HTTP URI:    %p", &r->uri);
     debug("HTTP QUERY:  %p", &r->query);*/
@@ -140,28 +112,20 @@ void free_request(Request *r) {
 
     free(r->method);
     free(r->path);
-    //if (r->query){
-    free(r->query); // if statement ?
-    //}
+    free(r->query);
     free(r->uri);
-    //free(r->host);
-    //free(r->port);
 
     /* Free headers */
     Header *header = r->headers;
     Header *n;
     while (header != NULL){
-        //puts("inside while");
-        //n = header->next;
         free(header->name);
         free(header->value);
-        //free(header);
         n = header;
         header = header->next;
         free(n);
     }
-    //free(r->headers);
-    
+
 
     /* Free request */
     free(r);
@@ -177,7 +141,6 @@ void free_request(Request *r) {
  * headers, returning 0 on success, and -1 on error.
  **/
 int parse_request(Request *r) {
-    //puts("pars req");
     /* Parse HTTP Request Method */
     /* Parse HTTP Requet Headers*/
     if (parse_request_method(r) != 0 || parse_request_headers(r) != 0)
@@ -203,25 +166,23 @@ int parse_request(Request *r) {
  * This function extracts the method, uri, and query (if it exists).
  **/
 int parse_request_method(Request *r) {
-    //puts("parse req method");
     char buffer[BUFSIZ];
     char *method;
     char *uri;
     char *query;
 
     /* Read line from socket */
-    
+
     if(!(fgets(buffer, BUFSIZ, r->file)) || strlen(buffer)<=2)
     {
         goto fail;
     }
-    
+
     /* Parse method and uri */
-    
+
     method = strtok(buffer, WHITESPACE);
-    //temp = '\0';
     uri = strtok(NULL, WHITESPACE);
-    
+
     /* Parse query from uri */
 
     if (uri && (query = strchr(uri, '?')))
@@ -245,10 +206,6 @@ int parse_request_method(Request *r) {
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
     debug("HTTP QUERY:  %s", r->query);
-
-    //free(r->method);
-    //free(r->uri);
-    //free(r->query);
 
     return 0;
 
@@ -284,7 +241,6 @@ fail:
  *      headers.append(header)
  **/
 int parse_request_headers(Request *r) {
-    //puts("parse req headers");
     Header *curr = r->headers;
     char buffer[BUFSIZ];
     char *name;
@@ -311,7 +267,7 @@ int parse_request_headers(Request *r) {
     }
 
 #ifndef NDEBUG
-    for (struct header *header = r->headers; header != NULL; header = header->next) 
+    for (struct header *header = r->headers; header != NULL; header = header->next)
     {
     	debug("HTTP HEADER %s = %s", header->name, header->value);
     }

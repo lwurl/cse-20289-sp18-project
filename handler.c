@@ -27,8 +27,8 @@ HTTPStatus handle_error(Request *request, HTTPStatus status);
  *
  * On error, handle_error should be used with an appropriate HTTP status code.
  **/
+
 HTTPStatus  handle_request(Request *r) {
-    //puts("handle_req");
     HTTPStatus result;
 
     /* Parse request */
@@ -42,10 +42,8 @@ HTTPStatus  handle_request(Request *r) {
     debug("HTTP REQUEST PATH: %s", r->path);
 
     /* Dispatch to appropriate request handler type based on file type */
-
     struct stat s;
     if(stat(r->path, &s) != 0){
-        puts("error lstat");
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
         goto done;
     }
@@ -65,7 +63,7 @@ HTTPStatus  handle_request(Request *r) {
     else{
         result = handle_error(r, HTTP_STATUS_BAD_REQUEST);
     }
-    
+
 done:
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
     return result;
@@ -94,9 +92,9 @@ HTTPStatus  handle_browse_request(Request *r) {
 
     /* Write HTTP Header with OK Status and text/html Content-Type */
     fputs("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n", r->file);
+
     /* For each entry in directory, emit HTML list item */
     fputs("<ul>\r\n", r->file);
-    //fputs("<ul>", r->file);
     for (size_t i = 1; i < n; i++) {
         if (streq(r->uri, "/")){
             fprintf(r->file, "<li><a href=\"/%s%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
@@ -104,7 +102,7 @@ HTTPStatus  handle_browse_request(Request *r) {
         else{
             fprintf(r->file, "<li><a href=\"/%s/%s\">%s</a></li>\n", r->uri+1, entries[i]->d_name, entries[i]->d_name);
         }
-        
+
         free(entries[i]);
     }
     free(entries[0]);
@@ -127,8 +125,8 @@ HTTPStatus  handle_browse_request(Request *r) {
  * If the path cannot be opened for reading, then handle error with
  * HTTP_STATUS_NOT_FOUND.
  **/
+
 HTTPStatus  handle_file_request(Request *r) {
-    //puts("handle file");
     FILE *fs;
     char buffer[BUFSIZ];
     char *mimetype = NULL;
@@ -157,10 +155,9 @@ HTTPStatus  handle_file_request(Request *r) {
 
 fail:
     /* Close file, free mimetype, return INTERNAL_SERVER_ERROR */
-    //fclose(fs);
-    //free(mimetype);
+    fclose(fs);
+    free(mimetype);
     return HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    //return handle_error(r, HTTP_STATUS_NOT_FOUND);
 }
 
 /**
@@ -261,7 +258,7 @@ HTTPStatus handle_cgi_request(Request *r) {
         fprintf(stderr, "Failed to close stream... %s\n", strerror(errno));
     }
     //fclose(pfs);
-    fflush(r->file); 
+    fflush(r->file);
     return HTTP_STATUS_OK;
 }
 

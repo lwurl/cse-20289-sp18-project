@@ -14,26 +14,21 @@
  * @return  Exit status of server (EXIT_SUCCESS).
  **/
 int single_server(int sfd) {
-    //puts("single.c");
     Request *request;
-    
+
     /* Accept and handle HTTP request */
     while (true) {
-    	//puts("Before accept");
         /* Accept request */
         request = accept_request(sfd);
         if (request == NULL){
             fprintf(stderr, "Failed to accept request: %s", strerror(errno));
             return EXIT_FAILURE;
-            //continue;
         }
 
 
-        //puts("before handle");
 	/* Handle request */
         handle_request(request);
 
-        //puts("before free");
 	/* Free request */
         free_request(request);
     }
